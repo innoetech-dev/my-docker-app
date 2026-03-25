@@ -70,7 +70,7 @@ function StatusDot({ status }) {
 function Terminal() {
   const [lines, setLines] = useState([])
   const [cursor, setCursor] = useState(true)
-  const bottomRef = useRef(null)
+  const bodyRef = useRef(null)
 
   useEffect(() => {
     const timers = TERMINAL_LINES.map(({ delay, type, text }) =>
@@ -87,8 +87,10 @@ function Terminal() {
     return () => clearInterval(t)
   }, [])
 
+  // Scroll only the terminal body, never the page
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = bodyRef.current
+    if (el) el.scrollTop = el.scrollHeight
   }, [lines])
 
   return (
@@ -99,7 +101,7 @@ function Terminal() {
         <span className="tb-dot tb-green" />
         <span className="terminal-title">ubuntu@docker-lab: ~/my-docker-app</span>
       </div>
-      <div className="terminal-body">
+      <div className="terminal-body" ref={bodyRef}>
         {lines.map((l, i) => (
           <div key={i} className={`tline tline-${l.type}`}>
             {l.type === 'cmd' && <span className="prompt">$ </span>}
@@ -111,7 +113,6 @@ function Terminal() {
           <span className="prompt">$ </span>
           <span className={`t-cursor ${cursor ? 'vis' : ''}`}>▋</span>
         </div>
-        <div ref={bottomRef} />
       </div>
     </div>
   )
